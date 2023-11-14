@@ -40,7 +40,7 @@ The Video Automation Toolkit is a Python script (`main.py`) designed to streamli
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/video-automation-toolkit.git
+   git clone https://github.com/Likhithsai2580/video-automation-toolkit.git
    cd video-automation-toolkit
    python main.py
 '
