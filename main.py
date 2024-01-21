@@ -113,16 +113,14 @@ class ScreenRecorder:
 
 def get_youtube_and_genai_api_keys():
     import os
-    #os.environ.get("YOUTUBE_API_KEY")
-    #os.environ.get("GENAI_API_KEY")
-    youtube_api_key = "AIzaSyAX7iNWd0bPHk9o-57N1L7KJL75c88lIjw"
-    gemini_api_key = "AIzaSyDeYs2_FId81oTJbfRZfAJzI7fa22lncL0"
+    youtube_api_key = os.environ.get("YOUTUBE_API_KEY")
+    gemini_api_key = os.environ.get("GENAI_API_KEY")
 
     if not (youtube_api_key):
         logging.error("YouTube API key. Make sure to set environment variables. Exiting. YOUTUBE_API_KEY")
         raise ValueError("API keys not found.")
     if not (gemini_api_key):
-        logging.error("OpenAI API key not found. Make sure to set environment variables. Exiting. GENAI_API_KEY")
+        logging.error("Gemini API key not found. Make sure to set environment variables. Exiting. GENAI_API_KEY")
         raise ValueError("API keys not found.")
 
     return youtube_api_key, gemini_api_key
@@ -346,7 +344,8 @@ def main():
     try:
         youtube_api_key, openai_api_key = get_youtube_and_genai_api_keys()
         youtube_api = YouTubeAPI(youtube_api_key)
-        channel_id = input("Enter your YouTube channel ID: ").strip()
+        #channel_id = input("Enter your YouTube channel ID: ").strip()
+        channel_id = "UC5N_8t5SzEyJrTx1bC66Kpw"
 
         if not channel_id:
             logging.warning("Invalid channel ID. Exiting.")
