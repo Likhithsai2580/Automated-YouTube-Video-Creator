@@ -5,7 +5,7 @@ def install_dependencies():
     """Install necessary dependencies."""
     try:
         # Install required Python packages
-        subprocess.run([sys.executable, "-m", "pip", "install", "coloredlogs", "pyttsx3", "Pillow", "pyautogui", "numpy", "pyaudio", "wave", "threading"])
+        subprocess.run([sys.executable, "-m", "pip", "install", "coloredlogs", "pyttsx3", "Pillow", "pyautogui", "numpy", "pyaudio", "wave", "google-generativeai"])
 
         # Check and install ffmpeg if not present
         if not check_ffmpeg_installation():
@@ -13,6 +13,12 @@ def install_dependencies():
     except Exception as e:
         logging.error(f"Error installing dependencies: {e}")
 
+def gemini(prompt):
+    import google.generativeai as genai
+    youtube_api_key, openai_api_key = get_youtube_and_genai_api_keys()
+    genai.configure(api_key=openai_api_key)
+    model = genai.GenerativeModel('gemini-pro')
+    response = model.generate_content(prompt)
 
 def check_ffmpeg_installation():
     """Check if ffmpeg is installed."""
@@ -105,16 +111,21 @@ class ScreenRecorder:
         stream.close()
         audio.terminate()
 
-def get_youtube_and_openai_api_keys():
+def get_youtube_and_genai_api_keys():
     import os
-    youtube_api_key = os.environ.get("YOUTUBE_API_KEY")
-    openai_api_key = os.environ.get("OPENAI_API_KEY")
+    #os.environ.get("YOUTUBE_API_KEY")
+    #os.environ.get("GENAI_API_KEY")
+    youtube_api_key = "AIzaSyAX7iNWd0bPHk9o-57N1L7KJL75c88lIjw"
+    gemini_api_key = "AIzaSyDeYs2_FId81oTJbfRZfAJzI7fa22lncL0"
 
-    if not (youtube_api_key and openai_api_key):
-        logging.error("YouTube API key or OpenAI API key not found. Make sure to set environment variables. Exiting.")
+    if not (youtube_api_key):
+        logging.error("YouTube API key. Make sure to set environment variables. Exiting. YOUTUBE_API_KEY")
+        raise ValueError("API keys not found.")
+    if not (gemini_api_key):
+        logging.error("OpenAI API key not found. Make sure to set environment variables. Exiting. GENAI_API_KEY")
         raise ValueError("API keys not found.")
 
-    return youtube_api_key, openai_api_key
+    return youtube_api_key, gemini_api_key
 
 
 class YouTubeAPI:
@@ -145,14 +156,6 @@ class YouTubeAPI:
             return previous_video_title
         except requests.exceptions.RequestException as err:
             logging.error(f"Error getting previous video title: {err}")
-            return None
-
-    def handle_openai_api_response(self, response):
-        """Handle OpenAI API response errors."""
-        if response.status_code == 200:
-            return response.json()
-        else:
-            logging.error(f"Non-200 status code received from OpenAI API: {response.status_code}")
             return None
 
     def upload_video_details(self, video_title, video_description, video_thumbnail_path):
@@ -259,11 +262,10 @@ def configure_logging():
     """Configure logging settings."""
     coloredlogs.install(level="INFO")
 
-def chatgpt_prompt(previous_video_title):
-    """Generate a prompt for ChatGPT."""
+def genai_prompt(video_title):
+    """Generate a prompt for gemini."""
     prompt = f"""
-    Generate a video script in sections. Each section should be in JSON format and include an explanation and a command. 
-    The previous video's title is "{previous_video_title}". Please respond with the sections in the following format:
+    Generate a video script in sections. Each section should be in JSON format and include an explanation and a command. video's title is "{video_title}". Please respond with the sections in the following format:
 
     {{
         "sections": [
@@ -273,25 +275,28 @@ def chatgpt_prompt(previous_video_title):
         ]
     }}
     """
-    return prompt
+    return gemini(prompt)
 
-def generate_video_script_sections(chatgpt_response):
+def generate_video_script_sections(genai_response):
     """Generate video script sections from ChatGPT response."""
     sections = []
 
-    paragraphs = chatgpt_response.split("\n")
+    if isinstance(genai_response, dict):
+        # Assuming 'sections' is the key containing the relevant text data
+        paragraphs = genai_response.get('sections', '').split("\n")
 
-    for paragraph in paragraphs:
-        section = {}
+        for paragraph in paragraphs:
+            section = {}
 
-        explanation, _, command = paragraph.partition(".")
+            explanation, _, command = paragraph.partition(".")
 
-        section["explanation"] = explanation.strip()
-        section["command"] = command.strip()
+            section["explanation"] = explanation.strip()
+            section["command"] = command.strip()
 
-        sections.append(section)
+            sections.append(section)
 
     return sections
+
 
 def text_to_speech(text):
     import pyttsx3
@@ -334,62 +339,29 @@ def main():
     import requests
     import logging
     from PIL import Image
+    install_dependencies()
     """Main function."""
     configure_logging()
     logging.info("Starting the script...")
-
     try:
-        install_dependencies()
-        youtube_api_key, openai_api_key = get_youtube_and_openai_api_keys()
+        youtube_api_key, openai_api_key = get_youtube_and_genai_api_keys()
         youtube_api = YouTubeAPI(youtube_api_key)
-
         channel_id = input("Enter your YouTube channel ID: ").strip()
 
         if not channel_id:
             logging.warning("Invalid channel ID. Exiting.")
             return
-
         previous_video_title = youtube_api.get_previous_video_title(channel_id)
+        title = gemini(f"my previous video is {previous_video_title} generate a title for which related to previous video. please give me only title")
+        discription=gemini(f"write discription for this video {title}")
 
-        if previous_video_title is None:
-            logging.warning("Error getting previous video title. Continuing with default.")
-            previous_video_title = "Default Previous Video Title"
+        sections = genai_prompt(title)
 
-        prompt = chatgpt_prompt(previous_video_title)
-
-        data = {
-            "engine": "text-davinci-002",
-            "prompt": prompt,
-            "temperature": 0.7,
-            "max_tokens": 150
-        }
-
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai_api_key}"
-        }
-
-        try:
-            response = requests.post(YouTubeAPI.OPENAI_API_ENDPOINT, headers=headers, json=data)
-            response.raise_for_status()
-            openai_response_data = youtube_api.handle_openai_api_response(response)
-        except requests.exceptions.HTTPError as http_err:
-            logging.error(f"HTTP error during OpenAI request: {http_err}")
-            return
-        except requests.exceptions.RequestException as req_err:
-            logging.error(f"Error during OpenAI request: {req_err}")
-            return
-        except json.JSONDecodeError as json_err:
-            logging.error(f"Error decoding OpenAI response: {json_err}")
-            return
-
-        chatgpt_response = generate_video_script_sections(openai_response_data)
-
-        if not chatgpt_response:
+        if not title or discription:
             logging.warning("Invalid ChatGPT response. Continuing with default.")
-            chatgpt_response = {"title": "Default Title", "description": "Default Description"}
+            gemini_response = {"title": "Default Title", "description": "Default Description"}
 
-        video_script_sections = generate_video_script_sections(type(chatgpt_response))
+        video_script_sections = generate_video_script_sections(type(sections))
         recorder = ScreenRecorder("output.mp4")
         recorder.start()
         for section in video_script_sections:
@@ -407,8 +379,7 @@ def main():
         video_thumbnail.save(thumbnail_path)
 
         video_path = input(f"Enter the path to the video file (or press Enter to use default: {YouTubeAPI.DEFAULT_VIDEO_PATH}): ").strip() or YouTubeAPI.DEFAULT_VIDEO_PATH
-
-        youtube_api.upload_video(chatgpt_response["title"], chatgpt_response["description"], thumbnail_path, video_path)
+        youtube_api.upload_video(title, discription, thumbnail_path, video_path)
 
     except KeyboardInterrupt:
         logging.debug("Script interrupted by user. Performing cleanup.")
