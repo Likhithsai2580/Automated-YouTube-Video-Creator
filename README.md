@@ -6,7 +6,7 @@ Automated-YouTube-Video-Creator is a Python script that streamlines the process 
 
 - **YouTube API Integration:** Interacts with the YouTube API to retrieve previous video details and upload video information.
   
-- **ChatGPT Integration:** Utilizes the Google Generative AI library (Gemini) to generate video scripts based on prompts provided to ChatGPT.
+- **Gemini Integration:** Utilizes the Google Generative AI library (Gemini) to generate video scripts based on prompts provided to ChatGPT.
 
 - **Screen Recording:** Implements a screen recording feature to capture the visual content for the generated video.
 
