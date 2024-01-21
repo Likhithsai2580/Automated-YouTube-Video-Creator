@@ -19,6 +19,7 @@ def gemini(prompt):
     genai.configure(api_key=openai_api_key)
     model = genai.GenerativeModel('gemini-pro')
     response = model.generate_content(prompt)
+    return response.text
 
 def check_ffmpeg_installation():
     """Check if ffmpeg is installed."""
