@@ -1,51 +1,70 @@
-# Video Automation Toolkit
+# Automated YouTube Video Creator
 
-## Overview
-The Video Automation Toolkit is a Python script (`main.py`) designed to streamline the process of creating and uploading videos to YouTube. This automation tool integrates with OpenAI's GPT (ChatGPT) for script generation and the YouTube API for uploading video details, thumbnails, and files.
+Automated-YouTube-Video-Creator is a Python script that streamlines the process of generating YouTube video scripts, recording the screen, and uploading the video to YouTube. This project leverages various Python libraries and APIs to automate the creation of engaging video content.
 
 ## Features
-1. **Dependency Installation:**
-   - Installs required Python packages and checks/installs `ffmpeg`.
 
-2. **Screen Recording:**
-   - Captures screen frames using `pyautogui` and records audio with `pyaudio`.
-   
-3. **YouTube API Integration:**
-   - Manages YouTube API interactions for uploading video details, thumbnails, and files.
-   - Retrieves the title of the previous video from a specified channel.
+- **YouTube API Integration:** Interacts with the YouTube API to retrieve previous video details and upload video information.
+  
+- **ChatGPT Integration:** Utilizes the Google Generative AI library (Gemini) to generate video scripts based on prompts provided to ChatGPT.
 
-4. **ChatGPT Interaction:**
-   - Utilizes ChatGPT to generate a video script based on a prompt.
-   - Converts script sections to speech using `pyttsx3`.
-   - Executes terminal commands and opens a terminal for specific actions.
+- **Screen Recording:** Implements a screen recording feature to capture the visual content for the generated video.
 
-5. **Logging and Configuration:**
-   - Configures logging settings for improved visibility.
+- **Text-to-Speech:** Converts text-based explanations into speech using the pyttsx3 library.
 
-6. **Cleanup:**
-   - Removes temporary files after script execution.
+- **Thumbnail Generation:** Generates video thumbnails using the PIL library and FFmpeg.
 
-## Usage
-1. Clone the repository.
-2. Install dependencies using `python main.py`.
-3. Run `main.py` and follow the prompts to enter the YouTube channel ID and paths for saving generated files.
-4. The script will generate a video script using ChatGPT, process it, and upload the video to YouTube.
+## Prerequisites
 
-## Requirements
-- Python 3.x
-- YouTube API key
-- OpenAI API key
-- Internet connection
+Before running the script, ensure you have the following:
+
+- Python installed on your machine.
+- API keys for YouTube and Gemini (Google Generative AI).
 
 ## Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Likhithsai2580/video-automation-toolkit.git
-   cd video-automation-toolkit
-   python main.py
-'
-## Configuration
-Set your YouTube API key and OpenAI API key as environment variables (YOUTUBE_API_KEY and OPENAI_API_KEY).
 
-## Acknowledgments
-Thanks to the developers of OpenAI's GPT and YouTube API for their valuable contributions.
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/your-username/Automated-YouTube-Video-Creator.git
+    cd Automated-YouTube-Video-Creator
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Set up API keys:
+
+    - Obtain a YouTube API key from the [YouTube Developer Console](https://console.developers.google.com/).
+    - Get a Gemini API key from [Gemini](https://gemini.google.com/).
+
+    Set these keys as environment variables or directly in the script.
+
+## Usage
+
+1. Run the main script:
+
+    ```bash
+    python main.py
+    ```
+
+2. Follow the prompts to input your YouTube channel ID and receive automated assistance in generating and uploading a video.
+
+## Customization
+
+Feel free to customize the script for your specific needs or extend its functionality. You may want to explore additional features, tweak the video script generation process, or enhance error handling.
+
+## Contributing
+
+Contributions are welcome! If you have suggestions, feature requests, or bug reports, please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+**Note:** Make sure to adhere to YouTube's policies and guidelines when using automated tools for content creation and uploading.
